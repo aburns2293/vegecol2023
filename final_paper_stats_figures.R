@@ -1,3 +1,5 @@
+# code written by Anna Burns (contact: anna.burns@stud.uni-greifswald.de)
+# last edited on 18.08.2023
 
 library(ggplot2)
 library(dplyr)
