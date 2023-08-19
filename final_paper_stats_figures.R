@@ -226,6 +226,65 @@ cor.test(hol.n.vec, pla.n.vec)
 
 n.perm <- twoSamplePermutationTestLocation(hol.n.vec, pla.n.vec, paired = TRUE)
 
+# relationship between N/P
+
+## leaf N - soil P
+
+ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "N",], 
+       aes(x = P.vol, y = `% in leaves`, col = Species, group = Species)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  theme_classic() +
+  xlab("Soil P mg/100 cm³") +
+  ylab("Leaf N (% of biomass)") +
+  ggtitle("Relationship between leaf N and soil P concentrations")
+
+## leaf P - soil C/N
+
+ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",], 
+       aes(x = Cn_soil, y = `% in leaves`, col = Species, group = Species)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  theme_classic() +
+  xlab("Soil C/N ratio") +
+  ylab("Leaf P (% of biomass)") +
+  ggtitle("Relationship between leaf P and soil C/N concentrations")
+
+## soil P - soil C/N
+
+ggplot(nutrient.combined.long, 
+       aes(x = Cn_soil, y = P.vol)) +
+  geom_point() +
+  geom_smooth(se = FALSE, col = "black") +
+  theme_classic() +
+  xlab("Soil C/N ratio") +
+  ylab("Soil P mg/100 cm³") +
+  ggtitle("Fig. 5: Relationship between soil P and C/N")
+
+## plant P - plant N
+
+ggplot(nutrient.combined, 
+       aes(x = N, y = P, group = Species, col = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_classic() +
+  xlab("Leaf N (% of biomass)") +
+  ylab("Leaf P (% of biomass)") +
+  ggtitle("Fig. 6: Relationship between leaf P and N")
+
+pla.pn <- nutrient.combined %>% filter(Species == "Plantago")
+
+pla.pn.fit1 <- lm(P~N, data = pla.pn)
+plot(pla.pn.fit1)
+summary(pla.pn.fit1)
+
+hol.pn <- nutrient.combined %>% filter(Species == "Holcus")
+
+hol.pn.fit1 <- lm(P~N, data = hol.pn)
+plot(hol.pn.fit1)
+summary(hol.pn.fit1)
+
+
 n.perm$p.value
 
 n.perm$estimate
