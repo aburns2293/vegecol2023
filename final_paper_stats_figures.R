@@ -226,6 +226,10 @@ cor.test(hol.n.vec, pla.n.vec)
 
 n.perm <- twoSamplePermutationTestLocation(hol.n.vec, pla.n.vec, paired = TRUE)
 
+n.perm$p.value
+
+n.perm$estimate
+
 # relationship between N/P
 
 ## leaf N - soil P
@@ -239,6 +243,20 @@ ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "N",],
   ylab("Leaf N (% of biomass)") +
   ggtitle("Relationship between leaf N and soil P concentrations")
 
+hol.leafn.soilp <- nutrient.combined %>% filter(Species == "Holcus")
+
+hol.leafn.soilp$N.bc <- BCTransform(hol.leafn.soilp$N, -1.4343434)
+
+hol.leafn.soilp.fit1 <- lm(N.bc ~ Cn_soil + P.vol, 
+                           data = hol.leafn.soilp)
+summary(hol.leafn.soilp.fit1)
+plot(hol.leafn.soilp.fit1)
+
+pla.leafn.soilp <- nutrient.combined %>% filter(Species == "Plantago")
+pla.leafn.soilp.fit1 <- lm(N ~ Cn_soil + P.vol, data = pla.leafn.soilp)
+summary(pla.leafn.soilp.fit1)
+plot(pla.leafn.soilp.fit1)
+
 ## leaf P - soil C/N
 
 ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",], 
@@ -249,6 +267,17 @@ ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",],
   xlab("Soil C/N ratio") +
   ylab("Leaf P (% of biomass)") +
   ggtitle("Relationship between leaf P and soil C/N concentrations")
+
+hol.leafp.soilcn <- nutrient.combined %>% filter(Species == "Holcus")
+
+hol.leafp.soilcn.fit1 <- lm(log(P) ~ log(Cn_soil), 
+                           data = hol.leafp.soilcn)
+summary(hol.leafp.soilcn.fit1)
+plot(hol.leafp.soilcn.fit1)
+
+pla.leafp.soilcn <- nutrient.combined %>% filter(Species == "Plantago")
+pla.leafp.soilcn.fit1 <- lm(P ~ Cn_soil, data = pla.leafp.soilcn)
+summary(pla.leafp.soilcn.fit1)
 
 ## soil P - soil C/N
 
@@ -284,7 +313,75 @@ hol.pn.fit1 <- lm(P~N, data = hol.pn)
 plot(hol.pn.fit1)
 summary(hol.pn.fit1)
 
+# c/n:p ratio
 
-n.perm$p.value
+nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Cn_soil/P)
 
-n.perm$estimate
+nutrient.combined.long2 <- pivot_longer(nutrient.combined, 
+                                        !c(ID, plot_id, soil_ratio, Cn_soil, P.vol, location, Species),
+                                                                  names_to = "Nutrient",
+                                                                  values_to = "% in leaves")
+
+ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Species, group = Species)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(vars(Nutrient)) +
+  theme_classic() +
+  xlab("soil C/N : soil P volume (mg/100 cm³)") +
+  ylab("% of leaf biomass") +
+  ggtitle("Fig. 7: Relationship between soil C/N : P ratio and leaf nutrients")
+
+## holcus
+
+### phosphorous
+
+hol.ratio.p <- nutrient.combined.long2 %>% filter(Species =="Holcus" &  Nutrient == "P")
+
+hol.ratio.p.fit1 <- lm(`% in leaves`~ soil_ratio, data = hol.ratio.p)
+summary(hol.ratio.p.fit1)
+plot(hol.ratio.p.fit1)
+
+hol.ratio.p.bc <- MASS::boxcox(hol.ratio.p.fit1)
+hol.ratio.p.bc.power <- hol.ratio.p.bc$x[which.max(hol.ratio.p.bc$y)]
+
+hol.ratio.p$P.bc <- BCTransform(hol.ratio.p$`% in leaves`, hol.ratio.p.bc.power)
+
+hol.ratio.p.fit2 <- lm(P.bc~soil_ratio, data = hol.ratio.p)
+summary(hol.ratio.p.fit2)
+plot(hol.ratio.p.fit2)
+
+### nitrogen
+
+hol.ratio.n <- nutrient.combined.long2 %>% filter(Species =="Holcus" &  Nutrient == "N")
+
+hol.ratio.n.fit1 <- lm(`% in leaves`~ soil_ratio, data = hol.ratio.n)
+summary(hol.ratio.n.fit1)
+plot(hol.ratio.n.fit1)
+
+## plantago
+
+### phosphorous
+
+pla.ratio.p <- nutrient.combined.long2 %>% filter(Species =="Plantago" &  Nutrient == "P")
+
+pla.ratio.p.fit1 <- lm(`% in leaves`~ soil_ratio, data = pla.ratio.p)
+summary(pla.ratio.p.fit1)
+plot(pla.ratio.p.fit1)
+
+pla.ratio.p.bc <- MASS::boxcox(pla.ratio.p.fit1)
+pla.ratio.p.bc.power <- pla.ratio.p.bc$x[which.max(pla.ratio.p.bc$y)]
+
+pla.ratio.p$P.bc <- BCTransform(pla.ratio.p$`% in leaves`, pla.ratio.p.bc.power)
+
+pla.ratio.p.fit2 <- lm(P.bc~soil_ratio, data = pla.ratio.p)
+summary(pla.ratio.p.fit2)
+
+### nitrogen
+
+pla.ratio.n <- nutrient.combined.long2 %>% filter(Species =="Plantago" &  Nutrient == "N")
+
+pla.ratio.n.fit1 <- lm(`% in leaves`~ soil_ratio, data = pla.ratio.n)
+summary(pla.ratio.n.fit1)
+plot(pla.ratio.n.fit1)
+
+
