@@ -261,8 +261,7 @@ plot(pla.leafn.soilp.fit1)
 
 ## leaf P - soil C/N
 
-ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",], 
-       aes(x = Cn_soil, y = `% in leaves`, col = Species, group = Species)) +
+ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",], aes(x = Cn_soil, y = `% in leaves`, col = Species, group = Species)) +
   geom_point() +
   geom_smooth(se = FALSE) +
   theme_classic() +
@@ -341,22 +340,23 @@ nutrient.combinedNP.long <- pivot_longer(nutrient.combinedNP,
 ##C/N/P---- 
 #outcomment if C/N/P shall be used instead of N/P 
 
-##WARNING descriptions of plots need to be changes WARNING##
+##WARNING descriptions of plots need to be changed WARNING##
 
 nutrient.combined <- nutrient.combinedNP #if outcommented -> C/N/P ratio analysis
 nutrient.combined.long <- nutrient.combinedNP.long #if outcommented -> C/N/P ratio analysis
 
-##WARNING descriptions of plots need to be changes WARNING##
+##WARNING descriptions of plots need to be changed and two changes in next 10 lines WARNING##
 
 ##C/N/P END ----
 
-nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Ntot_soil/P)
+nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Ntot_soil/P) #Ntot_soil or Cn_soil
 nutrient.combined2$soil_ratio
-nutrient.combined$Ntot_soil
+nutrient.combined$Ntot_soil #Ntot or Cn_soil
 nutrient.combined.long2 <- pivot_longer(nutrient.combined2,
-                                        !c(ID, plot_id, soil_ratio, Ntot_soil, P.vol, location, Species),
+                                        !c(ID, plot_id, soil_ratio, Ntot_soil, P.vol, location, Species), #Ntot_soil or Cn_soil
                                         names_to = "Nutrient",
                                         values_to = "% in leaves")
+nutrient.combined.long2
 
 ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Species, group = Species)) +
   geom_point() +
@@ -365,7 +365,7 @@ ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Spe
   theme_classic() +
   xlab("soil N : soil P volume (mg/100 cm³)") + #CHANGE if C/N/P is used
   ylab("% of leaf biomass") +
-  ggtitle("Fig. 7: Relationship between N : P ratio in soil and leaf nutrients") #CHANGE if C/N/P is used
+  ggtitle("Fig. 7: Relationship between N : P ratio in soil and nutrients in leaves") #CHANGE if C/N/P is used
 
 ## holcus
 
