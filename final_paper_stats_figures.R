@@ -8,6 +8,7 @@ library(stringr)
 library(MASS)
 library(EnvStats)
 
+
 # box-cox transformation function from 
 # https://www.css.cornell.edu/faculty/dgr2/_static/files/R_html/Transformations.html
 
@@ -17,6 +18,7 @@ BCTransform <- function(y, lambda=0) {
 }
 
 # data available upon request from anna.burns@stud.uni-greifswald.de
+setwd("D://Daten_Benni/Uni/Biodiversity, Ecology and Evolution M.Sc/Vorlesungen/3. Semester/Vegetation Ecology/R code and data files-20230727//")
 
 veg.allperiods<-read.table("veg_allperiods.csv", header=T, sep=";",dec=".")
 head.allperiods<-read.table("head_allperiods.csv", header=T, sep=";",dec=".")
@@ -41,7 +43,7 @@ p.long <- p.data %>% pivot_longer(!c(plot_id, location, P.vol),
 
 p.long$Species <- str_sub(p.long$Species, 3)
 p.long$ID <- str_c(p.long$plot_id,"_",p.long$location,"_",p.long$Species)
-  
+
 ## Nitrogen
 
 n.data <- data23 %>% dplyr::select(plot_id, location, Cn_soil, N_Holcus, N_Plantago)
@@ -84,7 +86,7 @@ ggplot(p.long, aes(x=P.vol, y=P, col = Species, group = Species)) +
 
 ggplot(n.long, aes(x=Cn_soil, y=N, col = Species, group = Species)) + 
   geom_point() +
-  geom_smooth(method = lm, se=FALSE) +
+  geom_smooth(se=FALSE, method = lm) +
   theme_classic() +
   labs(title = "Fig. 2: Nitrogen Concentrations in Leaves and Soil", 
        x="Soil C/N",
@@ -170,7 +172,7 @@ p.perm <- twoSamplePermutationTestLocation(hol.p.vec, pla.p.vec, paired = TRUE)
 p.perm$p.value
 
 p.perm$estimate
-
+summary(p.perm)
 # nitrogen statistics
 
 ## holcus
@@ -271,7 +273,7 @@ ggplot(nutrient.combined.long[nutrient.combined.long$Nutrient == "P",],
 hol.leafp.soilcn <- nutrient.combined %>% filter(Species == "Holcus")
 
 hol.leafp.soilcn.fit1 <- lm(log(P) ~ log(Cn_soil), 
-                           data = hol.leafp.soilcn)
+                            data = hol.leafp.soilcn)
 summary(hol.leafp.soilcn.fit1)
 plot(hol.leafp.soilcn.fit1)
 
@@ -313,23 +315,57 @@ hol.pn.fit1 <- lm(P~N, data = hol.pn)
 plot(hol.pn.fit1)
 summary(hol.pn.fit1)
 
-# c/n:p ratio
 
-nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Cn_soil/P)
+## N/P ratio ----
+n.dataNP <- data23 %>% dplyr::select(plot_id, location, Ntot_soil, N_Holcus, N_Plantago)
 
-nutrient.combined.long2 <- pivot_longer(nutrient.combined2, 
-                                        !c(ID, plot_id, soil_ratio, Cn_soil, P.vol, location, Species),
-                                                                  names_to = "Nutrient",
-                                                                  values_to = "% in leaves")
+n.longNP <- n.dataNP %>% pivot_longer(!c(plot_id, location, Ntot_soil), 
+                                      names_to = "Species",
+                                      values_to = "N")
+
+n.longNP$Species <- str_sub(n.longNP$Species, 3)
+n.longNP$ID <- str_c(n.longNP$plot_id,"_",n.longNP$location,"_",n.longNP$Species)
+
+nutrient.combinedNP <- left_join(n.longNP, p.long, by = join_by(ID))
+
+nutrient.combinedNP <- nutrient.combinedNP %>% dplyr::select(-c(plot_id.x, location.x, Species.x))
+nutrient.combinedNP <- nutrient.combinedNP %>% rename(location = location.y)
+nutrient.combinedNP <- nutrient.combinedNP %>% rename(plot_id = plot_id.y)
+nutrient.combinedNP <- nutrient.combinedNP %>% rename(Species = Species.y)
+
+nutrient.combinedNP.long <- pivot_longer(nutrient.combinedNP, 
+                                         !c(ID, plot_id, Ntot_soil, P.vol, location, Species),
+                                         names_to = "Nutrient",
+                                         values_to = "% in leaves")
+
+##C/N/P---- 
+#outcomment if C/N/P shall be used instead of N/P 
+
+##WARNING descriptions of plots need to be changes WARNING##
+
+nutrient.combined <- nutrient.combinedNP #if outcommented -> C/N/P ratio analysis
+nutrient.combined.long <- nutrient.combinedNP.long #if outcommented -> C/N/P ratio analysis
+
+##WARNING descriptions of plots need to be changes WARNING##
+
+##C/N/P END ----
+
+nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Ntot_soil/P)
+nutrient.combined2$soil_ratio
+nutrient.combined$Ntot_soil
+nutrient.combined.long2 <- pivot_longer(nutrient.combined2,
+                                        !c(ID, plot_id, soil_ratio, Ntot_soil, P.vol, location, Species),
+                                        names_to = "Nutrient",
+                                        values_to = "% in leaves")
 
 ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Species, group = Species)) +
   geom_point() +
   geom_smooth(se = FALSE) +
   facet_wrap(vars(Nutrient)) +
   theme_classic() +
-  xlab("soil C/N : soil P volume (mg/100 cm³)") +
+  xlab("soil N : soil P volume (mg/100 cm³)") + #CHANGE if C/N/P is used
   ylab("% of leaf biomass") +
-  ggtitle("Fig. 7: Relationship between soil C/N : P ratio and leaf nutrients")
+  ggtitle("Fig. 7: Relationship between N : P ratio in soil and leaf nutrients") #CHANGE if C/N/P is used
 
 ## holcus
 
@@ -383,5 +419,4 @@ pla.ratio.n <- nutrient.combined.long2 %>% filter(Species =="Plantago" &  Nutrie
 pla.ratio.n.fit1 <- lm(`% in leaves`~ soil_ratio, data = pla.ratio.n)
 summary(pla.ratio.n.fit1)
 plot(pla.ratio.n.fit1)
-
 
