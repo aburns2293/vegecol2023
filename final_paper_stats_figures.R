@@ -33,7 +33,7 @@ data23 <- data23 %>% mutate(P.vol = bulk_mean*P_cal_soil,
 
 ## Phosphorous
 
-p.data <- data23 %>% select(plot_id, location, P.vol, P_Holcus, P_Plantago)
+p.data <- data23 %>% dplyr::select(plot_id, location, P.vol, P_Holcus, P_Plantago)
 
 p.long <- p.data %>% pivot_longer(!c(plot_id, location, P.vol), 
                                   names_to = "Species",
@@ -44,7 +44,7 @@ p.long$ID <- str_c(p.long$plot_id,"_",p.long$location,"_",p.long$Species)
   
 ## Nitrogen
 
-n.data <- data23 %>% select(plot_id, location, Cn_soil, N_Holcus, N_Plantago)
+n.data <- data23 %>% dplyr::select(plot_id, location, Cn_soil, N_Holcus, N_Plantago)
 
 n.long <- n.data %>% pivot_longer(!c(plot_id, location, Cn_soil), 
                                   names_to = "Species",
@@ -57,7 +57,7 @@ n.long$ID <- str_c(n.long$plot_id,"_",n.long$location,"_",n.long$Species)
 
 nutrient.combined <- left_join(n.long, p.long, by = join_by(ID))
 
-nutrient.combined <- nutrient.combined %>% select(-c(plot_id.x, location.x, Species.x))
+nutrient.combined <- nutrient.combined %>% dplyr::select(-c(plot_id.x, location.x, Species.x))
 nutrient.combined <- nutrient.combined %>% rename(location = location.y)
 nutrient.combined <- nutrient.combined %>% rename(plot_id = plot_id.y)
 nutrient.combined <- nutrient.combined %>% rename(Species = Species.y)
@@ -84,7 +84,7 @@ ggplot(p.long, aes(x=P.vol, y=P, col = Species, group = Species)) +
 
 ggplot(n.long, aes(x=Cn_soil, y=N, col = Species, group = Species)) + 
   geom_point() +
-  geom_smooth(se=FALSE) +
+  geom_smooth(method = lm, se=FALSE) +
   theme_classic() +
   labs(title = "Fig. 2: Nitrogen Concentrations in Leaves and Soil", 
        x="Soil C/N",
@@ -317,7 +317,7 @@ summary(hol.pn.fit1)
 
 nutrient.combined2 <- nutrient.combined %>% mutate(soil_ratio = Cn_soil/P)
 
-nutrient.combined.long2 <- pivot_longer(nutrient.combined, 
+nutrient.combined.long2 <- pivot_longer(nutrient.combined2, 
                                         !c(ID, plot_id, soil_ratio, Cn_soil, P.vol, location, Species),
                                                                   names_to = "Nutrient",
                                                                   values_to = "% in leaves")
