@@ -18,7 +18,7 @@ BCTransform <- function(y, lambda=0) {
 }
 
 # data available upon request from anna.burns@stud.uni-greifswald.de
-setwd("D://Daten_Benni/Uni/Biodiversity, Ecology and Evolution M.Sc/Vorlesungen/3. Semester/Vegetation Ecology/R code and data files-20230727//")
+setwd()
 
 veg.allperiods<-read.table("veg_allperiods.csv", header=T, sep=";",dec=".")
 head.allperiods<-read.table("head_allperiods.csv", header=T, sep=";",dec=".")
