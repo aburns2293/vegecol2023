@@ -337,11 +337,6 @@ nutrient.combinedNP.long <- pivot_longer(nutrient.combinedNP,
                                          names_to = "Nutrient",
                                          values_to = "% in leaves")
 
-##C/N/P---- 
-#outcomment if C/N/P shall be used instead of N/P 
-
-##WARNING descriptions of plots need to be changed WARNING##
-
 nutrient.combined <- nutrient.combinedNP #if outcommented -> C/N/P ratio analysis
 nutrient.combined.long <- nutrient.combinedNP.long #if outcommented -> C/N/P ratio analysis
 
@@ -357,6 +352,49 @@ nutrient.combined.long2 <- pivot_longer(nutrient.combined2,
                                         names_to = "Nutrient",
                                         values_to = "% in leaves")
 nutrient.combined.long2
+
+## statistics for n/p ratio
+
+### plantago N: N/P
+
+pla.n.np <- nutrient.combined.long2 %>% filter(Species == "Plantago" & Nutrient == "N")
+
+pla.n.np.lm1 <- lm(`% in leaves` ~ soil_ratio, pla.n.np)
+summary(pla.n.np.lm1)
+plot(pla.n.np.lm1)
+
+pla.n.np.bc <- MASS::boxcox(pla.n.np.lm1)
+pla.n.np.bc.power <- pla.n.np.bc$x[which.max(pla.n.np.bc$y)]
+
+pla.n.np$n.bc <- BCTransform(pla.n.np$`% in leaves`, pla.n.np.bc.power)
+
+pla.n.np.lm2 <- lm(n.bc ~ soil_ratio, pla.n.np)
+summary(pla.n.np.lm2)
+plot(pla.n.np.lm2)
+
+### holcus N: N/P
+
+hol.n.np <- nutrient.combined.long2 %>% filter(Species == "Holcus" & Nutrient == "N")
+
+hol.n.np.lm1 <- lm(`% in leaves` ~ soil_ratio, hol.n.np)
+summary(hol.n.np.lm1)
+plot(hol.n.np.lm1)
+
+### plantago P : N/P
+
+pla.p.np <- nutrient.combined.long2 %>% filter(Species == "Plantago" & Nutrient == "P")
+
+pla.p.np.lm1 <- lm(`% in leaves` ~ log10(soil_ratio), pla.p.np)
+summary(pla.p.np.lm1)
+plot(pla.p.np.lm1)
+
+### holcus P : N/P
+
+hol.p.np <- nutrient.combined.long2 %>% filter(Species == "Holcus" & Nutrient == "P")
+
+hol.p.np.lm1 <- lm(`% in leaves` ~ log10(soil_ratio), hol.p.np)
+summary(hol.p.np.lm1)
+plot(hol.p.np.lm1)
 
 ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Species, group = Species)) +
   geom_point() +
