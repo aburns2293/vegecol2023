@@ -289,7 +289,7 @@ ggplot(nutrient.combined.long,
   theme_classic() +
   xlab("Soil C/N ratio") +
   ylab("Soil P mg/100 cm³") +
-  ggtitle("Fig. 5: Relationship between soil P and C/N")
+  ggtitle("Fig. 4: Relationship between soil P and C/N")
 
 ## plant P - plant N
 
@@ -300,7 +300,7 @@ ggplot(nutrient.combined,
   theme_classic() +
   xlab("Leaf N (% of biomass)") +
   ylab("Leaf P (% of biomass)") +
-  ggtitle("Fig. 6: Relationship between leaf P and N")
+  ggtitle("Fig. 5: Relationship between leaf P and N")
 
 pla.pn <- nutrient.combined %>% filter(Species == "Plantago")
 
@@ -365,7 +365,7 @@ ggplot(nutrient.combined.long2, aes(x = soil_ratio, y = `% in leaves`, col = Spe
   theme_classic() +
   xlab("soil N : soil P volume (mg/100 cm³)") + #CHANGE if C/N/P is used
   ylab("% of leaf biomass") +
-  ggtitle("Fig. 7: Relationship between N : P ratio in soil and nutrients in leaves") #CHANGE if C/N/P is used
+  ggtitle("Fig. 6: Relationship between N : P ratio in soil and nutrients in leaves") #CHANGE if C/N/P is used
 
 ## holcus
 
